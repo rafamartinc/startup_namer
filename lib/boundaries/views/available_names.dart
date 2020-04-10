@@ -16,6 +16,9 @@ class RandomWordsState extends State<RandomWords> {
 
   @override
   Widget build(BuildContext context) {
+
+    var padding = const EdgeInsets.all(16.0);
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Startup Name Generator'),
@@ -23,34 +26,47 @@ class RandomWordsState extends State<RandomWords> {
           IconButton(icon: Icon(Icons.list), onPressed: _pushSaved,)
         ],
       ),
-      body: _buildSuggestions(),
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          if (orientation == Orientation.portrait) {
+            return ListView.builder(
+              padding: padding,
+              itemBuilder: (context, i) {
+
+                if (i >= _suggestions.length) {
+                  _suggestions.addAll(NameCreation().getNames(10));
+                }
+
+                return _buildItem(_suggestions[i]);
+              });
+          } else {
+              return GridView.builder(
+                padding: padding,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 1.5 * MediaQuery.of(context).size.width / MediaQuery.of(context).size.height
+                
+                ),
+                itemBuilder: (context, i) {
+
+                if (i >= _suggestions.length) {
+                  _suggestions.addAll(NameCreation().getNames(10));
+                }
+
+                return _buildItem(_suggestions[i]);
+              }
+            );
+          }
+        }
+      ),
     );
   }
 
-  Widget _buildSuggestions() {
-    return ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemBuilder: (context, i) {
-
-          if (i.isOdd) {
-            return Divider();
-          }
-
-          final index = i ~/ 2;
-
-          if (index >= _suggestions.length) {
-            _suggestions.addAll(NameCreation().getNames(10));
-          }
-
-          return _buildRow(_suggestions[index]);
-        });
-  }
-
-  Widget _buildRow(StartupName pair) {
+  Widget _buildItem(StartupName pair) {
     final bool alreadySaved = _saved.contains(pair);
 
     return Container(
-      height: 100,
+      height: 80,
 
       child: Padding(
         padding: EdgeInsets.all(8.0),
